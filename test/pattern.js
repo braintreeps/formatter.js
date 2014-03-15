@@ -4,7 +4,7 @@
  * (C) 2013 First Opinion
  * MIT LICENCE
  *
- */ 
+ */
 
 // 3rd party
 var should = require('chai').should(),
@@ -46,5 +46,19 @@ describe('pattern.js', function () {
       assert.equal(result.mLength, 14);
     });
   });
+
+  xit('accepts a literal at the end of the pattern', function (){
+    var result = pattern.parse('_{{9}}_');
+
+    assert.deepEqual(result.chars, {
+      '0': '_',
+      '2': '_'
+    });
+    assert.deepEquals(result.inpts, {
+      '0': '9'
+    });
+    assert.equal(result.mLength, 3);
+  });
+  xit('can delete a char at the end of the pattern');
 
 });

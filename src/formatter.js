@@ -234,10 +234,18 @@ Formatter.prototype._processKey = function (chars, delKey,ingoreCaret) {
   // Init values
   this.delta = 0;
 
+  // When deleting, prepare to delete all trailing format chars
+  if (delKey) {
+    // Count number of format chars preceding selection
+    for (var i = this.sel.end-1; i > 0 && this.chars[i]; i--) {
+      this.delta--;
+    }
+  }
+
   // If chars were highlighted, we need to remove them
   if (this.sel.begin !== this.sel.end) {
-    this.delta = (-1) * Math.abs(this.sel.begin - this.sel.end);
-    this.val   = utils.removeChars(this.val, this.sel.begin, this.sel.end);
+    this.delta -= Math.abs(this.sel.begin - this.sel.end);
+    this.val   = utils.removeChars(this.val, this.sel.end + this.delta, this.sel.end);
   }
 
   // Delete key (moves opposite direction)
@@ -246,8 +254,8 @@ Formatter.prototype._processKey = function (chars, delKey,ingoreCaret) {
 
   // or Backspace and not at start
   } else if (delKey && this.sel.begin - 1 >= 0) {
-    this.val = utils.removeChars(this.val, this.sel.end -1, this.sel.end);
-    this.delta = -1;
+    this.delta -= 1;
+    this.val = utils.removeChars(this.val, this.sel.end + this.delta, this.sel.end);
 
   // or Backspace and at start - exit
   } else if (delKey) {
@@ -261,8 +269,10 @@ Formatter.prototype._processKey = function (chars, delKey,ingoreCaret) {
     this.delta += chars.length;
   }
 
+
   // Format el.value (also handles updating caret position)
   this._formatValue(ingoreCaret);
+
 };
 
 //
@@ -311,6 +321,7 @@ Formatter.prototype._formatValue = function (ignoreCaret) {
 
   // Validate inputs
   this._validateInpts();
+
   // Add formatted characters
   this._addChars();
 
@@ -347,6 +358,7 @@ Formatter.prototype._removeChars = function () {
     // If after selection we need to account for delta
     pos = (i >= this.sel.begin) ? pos + this.delta : pos;
     val = this.val.charAt(pos);
+
     // Remove char and account for shift
     if (curChar && curChar == val || curHldr && curHldr == val) {
       this.val = utils.removeChars(this.val, pos, pos + 1);

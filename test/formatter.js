@@ -54,6 +54,27 @@ describe('formatter.js', function () {
     inptSel.set.restore();
   });
 
+  describe("foo", function (){
+    var formatted;
+
+    beforeEach(function (){
+      formatted = new Formatter(el, {
+        pattern: "{{*}}--{{*}}"
+      });
+    });
+
+    xit('Should leave trailing format chars on backspace key when deleting a non format char', function (done) {
+      console.log("Test 67");
+      user.keySeq('12', function () {
+        assert.equal(formatted.el.value, '1--2');
+        console.log("backspace");
+        user.key('backspace');
+        assert.equal(formatted.el.value, '1--');
+        done();
+      });
+    });
+  });
+
   //
   // Formatter global tests
   //
@@ -322,11 +343,30 @@ describe('formatter.js', function () {
       });
     });
 
+    it('Should remove all trailing format chars on backspace key', function (done) {
+      user.keySeq('123456', function () {
+        user.key('backspace');
+        assert.equal(formatted.el.value, '(123) 45');
+        done();
+      });
+    });
+
+
     it('Should remove next character on delete key', function (done) {
       user.keySeq('234567890', function () {
         sel = { begin: 2, end: 2 };
         user.key('delete');
         assert.equal(formatted.el.value, '(245) 678-90');
+        done();
+      });
+    });
+
+    it('Should remove format chars at end on delete key', function (done) {
+      user.keySeq('212', function () {
+        sel = { begin: 3, end: 3 };
+        assert.equal(formatted.el.value, '(212) ');
+        user.key('delete');
+        assert.equal(formatted.el.value, '(21');
         done();
       });
     });
